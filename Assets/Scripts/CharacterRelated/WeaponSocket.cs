@@ -19,12 +19,10 @@ class WeaponSocket : GearSocket
         {
             if (y == 1)
             {
-                //Back
                 spriteRenderer.sortingOrder = parentRenderer.sortingOrder - 1;
             }
             else
             {
-                //Front
                 spriteRenderer.sortingOrder = parentRenderer.sortingOrder + 5;
             }
         }

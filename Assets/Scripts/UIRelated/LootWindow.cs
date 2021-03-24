@@ -37,9 +37,6 @@ public class LootWindow : MonoBehaviour
     [SerializeField]
     private GameObject nextBtn, previousBtn;
 
-    /// <summary>
-    /// NOTE FOR DEBUGGING ONLY
-    /// </summary>
     [SerializeField]
     private Item[] items;
 
@@ -85,10 +82,8 @@ public class LootWindow : MonoBehaviour
     {
         if (pages.Count > 0)
         {
-            //Handle page numbers
             pageNumber.text = pageIndex + 1 + "/" + pages.Count;
 
-            //Handle next and prev buttons
             previousBtn.SetActive(pageIndex > 0);
             nextBtn.SetActive(pages.Count > 1 && pageIndex < pages.Count - 1);
 
@@ -96,17 +91,14 @@ public class LootWindow : MonoBehaviour
             {
                 if (pages[pageIndex][i] != null)
                 {
-                    //Set the loot buttons icon
                     lootButtons[i].MyIcon.sprite = pages[pageIndex][i].MyIcon;
 
                     lootButtons[i].MyLoot = pages[pageIndex][i];
 
-                    //Make sure the loot buttons is visible
                     lootButtons[i].gameObject.SetActive(true);
 
                     string title = string.Format("<color={0}>{1}</color>", QualityColor.MyColors[pages[pageIndex][i].MyQuality], pages[pageIndex][i].MyTitle);
 
-                    //Set the title
                     lootButtons[i].MyTitle.text = title;
                 }
 
@@ -127,7 +119,6 @@ public class LootWindow : MonoBehaviour
 
     public void NextPage()
     {
-        //we check if we have more pages
         if (pageIndex < pages.Count - 1)
         {
             pageIndex++;
@@ -138,7 +129,6 @@ public class LootWindow : MonoBehaviour
 
     public void PreviousPage()
     {
-        //We are checking if we have more pages in the backwards direction
         if (pageIndex > 0)
         {
             pageIndex--;
@@ -155,7 +145,6 @@ public class LootWindow : MonoBehaviour
 
         if (pages[pageIndex].Count == 0)
         {
-            //Removes the empty page
             pages.Remove(pages[pageIndex]);
 
             if (pageIndex == pages.Count && pageIndex > 0)

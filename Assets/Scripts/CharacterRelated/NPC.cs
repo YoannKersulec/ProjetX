@@ -56,7 +56,6 @@ public class NPC : Character, IInteractable
 
     public virtual void Interact()
     {
-        //Not implemented yet
         Debug.Log("This will open a dialogue with the NPC");
     }
 

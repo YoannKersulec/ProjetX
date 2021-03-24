@@ -26,7 +26,6 @@ public class GearSocket : MonoBehaviour
 
     public virtual void SetXAndY(float x, float y)
     {
-        //Sets the animation parameter so that he faces the correct direction
         MyAnimator.SetFloat("x", x);
         MyAnimator.SetFloat("y", y);
     }

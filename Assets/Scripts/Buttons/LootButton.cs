@@ -42,7 +42,6 @@ public class LootButton : MonoBehaviour, IPointerEnterHandler,IPointerExitHandle
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        //we need to loot the item right here.
         if (InventoryScript.MyInstance.AddItem(MyLoot))
         {
             gameObject.SetActive(false);

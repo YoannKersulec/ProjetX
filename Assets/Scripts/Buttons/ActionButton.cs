@@ -6,9 +6,6 @@ using UnityEngine.UI;
 
 public class ActionButton : MonoBehaviour, IPointerClickHandler, IClickable,IPointerEnterHandler, IPointerExitHandler
 {
-    /// <summary>
-    /// A reference t o the useable on the actionbutton
-    /// </summary>
     public IUseable MyUseable { get; set; }
 
     [SerializeField]
@@ -18,9 +15,6 @@ public class ActionButton : MonoBehaviour, IPointerClickHandler, IClickable,IPoi
 
     private int count;
 
-    /// <summary>
-    /// A reference to the actual button that this button uses
-    /// </summary>
     public Button MyButton { get; private set; }
 
     public Image MyIcon
@@ -56,7 +50,6 @@ public class ActionButton : MonoBehaviour, IPointerClickHandler, IClickable,IPoi
     [SerializeField]
     private Image icon;
 
-    // Use this for initialization
     void Start ()
     {
         MyButton = GetComponent<Button>();
@@ -65,14 +58,10 @@ public class ActionButton : MonoBehaviour, IPointerClickHandler, IClickable,IPoi
 
 	}
 	
-	// Update is called once per frame
 	void Update () {
 		
 	}
 
-    /// <summary>
-    /// This is executed the the button is clicked
-    /// </summary>
     public void OnClick()
     {
         if (HandScript.MyInstance.MyMoveable == null)
@@ -89,10 +78,6 @@ public class ActionButton : MonoBehaviour, IPointerClickHandler, IClickable,IPoi
 
     }
 
-    /// <summary>
-    /// Checks if someone clicked on the actionbutton
-    /// </summary>
-    /// <param name="eventData"></param>
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Left)
@@ -104,9 +89,6 @@ public class ActionButton : MonoBehaviour, IPointerClickHandler, IClickable,IPoi
         }
     }
 
-    /// <summary>
-    /// Sets the useable on an actionbutton
-    /// </summary>
     public void SetUseable(IUseable useable)
     {
         if (useable is Item)
@@ -126,9 +108,6 @@ public class ActionButton : MonoBehaviour, IPointerClickHandler, IClickable,IPoi
         UpdateVisual();
     }
 
-    /// <summary>
-    /// Updates the visual representation of the actionbutton
-    /// </summary>
     public void UpdateVisual() 
     {
         MyIcon.sprite = HandScript.MyInstance.Put().MyIcon;
@@ -166,11 +145,9 @@ public class ActionButton : MonoBehaviour, IPointerClickHandler, IClickable,IPoi
         if (MyUseable !=null && MyUseable is IDescribable)
         {
             tmp = (IDescribable)MyUseable;
-            //UIManager.MyInstance.ShowToolitip(transform.position);
         }
         else if (useables.Count > 0)
         {
-           // UIManager.MyInstance.ShowToolitip(transform.position);
         }
         if (tmp != null)
         {

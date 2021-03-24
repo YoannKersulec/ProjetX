@@ -5,58 +5,50 @@ using UnityEngine.EventSystems;
 
 public class GameManager : MonoBehaviour {
     
-    /// <summary>
-    /// A reference to the player object
-    /// </summary>
     [SerializeField]
     private Player player;
 
     private NPC currentTarget;
 
-	// Update is called once per frame
 	void Update ()
     {
-        //Executes click target
         ClickTarget();
 	}
 
     private void ClickTarget()
     {
-        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())//If we click the left mouse button
+        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
         {
-            //Makes a raycast from the mouse position into the game world
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition),Vector2.zero,Mathf.Infinity,512);
 
-            if (hit.collider != null && hit.collider.tag == "Enemy")//If we hit something
+            if (hit.collider != null && hit.collider.tag == "Enemy")
             {
-                if (currentTarget != null)//If we have a current target
+                if (currentTarget != null)
                 {
-                    currentTarget.DeSelect(); //deselct the current target
+                    currentTarget.DeSelect(); 
                 }
 
-                currentTarget = hit.collider.GetComponent<NPC>(); //Selects the new target
+                currentTarget = hit.collider.GetComponent<NPC>(); 
 
-                player.MyTarget = currentTarget.Select(); //Gives the player the new target
+                player.MyTarget = currentTarget.Select();
 
                 UIManager.MyInstance.ShowTargetFrame(currentTarget);
             }
-            else//Deselect the target
+            else
             {
                 UIManager.MyInstance.HideTargetFrame();
 
-                if (currentTarget != null) //If we have a current target
+                if (currentTarget != null)
                 {
-                    currentTarget.DeSelect(); //We deselct it
+                    currentTarget.DeSelect(); 
                 }
 
-                //We remove the references to the target
                 currentTarget = null;
                 player.MyTarget = null;
             }
         }
         else if (Input.GetMouseButtonDown(1) && !EventSystem.current.IsPointerOverGameObject())
         {
-            //Makes a raycast from the mouse position into the game world
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero, Mathf.Infinity, 512);
 
             if (hit.collider != null && (hit.collider.tag == "Enemy" || hit.collider.tag == "Interactable"))
