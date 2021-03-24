@@ -234,8 +234,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 17516912}
-  openSprite: {fileID: 21300000, guid: d879b7fbb54e5fe40900352da5987810, type: 3}
-  closedSprite: {fileID: 21300000, guid: 2763e063cf78ea0469ee8d496e907833, type: 3}
+  openSprite: {fileID: 21300000, guid: 6df252f8d517d8942a5a0d37dcfd90f4, type: 3}
+  closedSprite: {fileID: 21300000, guid: 6df252f8d517d8942a5a0d37dcfd90f4, type: 3}
   canvasGroup: {fileID: 443217987}
   bag: {fileID: 443217988}
 --- !u!58 &17516911
@@ -313,7 +313,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 17516909}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -17.76, y: 5.07, z: 0}
+  m_LocalPosition: {x: -17.74, y: 5.07, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -1884,8 +1884,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 381111682}
-  openSprite: {fileID: 21300000, guid: d879b7fbb54e5fe40900352da5987810, type: 3}
-  closedSprite: {fileID: 21300000, guid: 2763e063cf78ea0469ee8d496e907833, type: 3}
+  openSprite: {fileID: 21300000, guid: 6df252f8d517d8942a5a0d37dcfd90f4, type: 3}
+  closedSprite: {fileID: 21300000, guid: 6df252f8d517d8942a5a0d37dcfd90f4, type: 3}
   canvasGroup: {fileID: 443217987}
   bag: {fileID: 443217988}
 --- !u!58 &381111681
