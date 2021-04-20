@@ -20,8 +20,8 @@ TagManager:
   - 
   - Block
   - Clickable
-  - 
-  - 
+  - Both
+  - Minimap
   - 
   - 
   - 
@@ -43,11 +43,17 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Ground
+    uniqueID: 2595191673
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
   - name: TopLayer
     uniqueID: 3676210671
+    locked: 0
+  - name: SCT
+    uniqueID: 2949256547
     locked: 0
   - name: UI
     uniqueID: 3786878281

@@ -2,21 +2,52 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : NPC
+public delegate void HealthChanged(float health);
+
+public delegate void CharacterRemoved();
+
+public class Enemy : Character, IInteractable
 {
+    public event HealthChanged healthChanged;
+
+    public event CharacterRemoved characterRemoved;
+
+    /// <summary>
+    /// A canvasgroup for the healthbar
+    /// </summary>
     [SerializeField]
     private CanvasGroup healthGroup;
 
+    /// <summary>
+    /// The enemys current state
+    /// </summary>
     private IState currentState;
 
     [SerializeField]
     private LootTable lootTable;
 
+    /// <summary>
+    /// The enemys attack range
+    /// </summary>
     public float MyAttackRange { get; set; }
 
+    /// <summary>
+    /// How much time has passed since the last attack
+    /// </summary>
     public float MyAttackTime { get; set; }
 
     public Vector3 MyStartPosition { get; set; }
+
+    [SerializeField]
+    private Sprite portrait;
+
+    public Sprite MyPortrait
+    {
+        get
+        {
+            return portrait;
+        }
+    }
 
     [SerializeField]
     private float initAggroRange;
@@ -30,9 +61,13 @@ public class Enemy : NPC
             return Vector2.Distance(transform.position, MyTarget.position) < MyAggroRange;
         }
     }
-
+    
     protected void Awake()
     {
+        health.Initialize(initHealth, initHealth);
+        SpriteRenderer sr;
+        sr = GetComponent<SpriteRenderer>();
+        sr.enabled = true;
         MyStartPosition = transform.position;
         MyAggroRange = initAggroRange;
         MyAttackRange = 1;
@@ -56,42 +91,75 @@ public class Enemy : NPC
 
     }
 
-    public override Transform Select()
+    /// <summary>
+    /// When the enemy is selected
+    /// </summary>
+    /// <returns></returns>
+    public Transform Select()
     {
+        //Shows the health bar
         healthGroup.alpha = 1;
 
-        return base.Select();
+        return hitBox;
     }
 
-    public override void DeSelect()
+    /// <summary>
+    /// When we deselect our enemy
+    /// </summary>
+    public void DeSelect()
     {
+        //Hides the healthbar
         healthGroup.alpha = 0;
 
-        base.DeSelect();
+        healthChanged -= new HealthChanged(UIManager.MyInstance.UpdateTargetFrame);
+
+        characterRemoved -= new CharacterRemoved(UIManager.MyInstance.HideTargetFrame);
+  
     }
 
+
+    /// <summary>
+    /// Makes the enemy take damage when hit
+    /// </summary>
+    /// <param name="damage"></param>
     public override void TakeDamage(float damage, Transform source)
     {
         if (!(currentState is EvadeState))
         {
-            SetTarget(source);
+            if (IsAlive)
+            {
+                SetTarget(source);
 
-            base.TakeDamage(damage, source);
+                base.TakeDamage(damage, source);
 
-            OnHealthChanged(health.MyCurrentValue);
+                OnHealthChanged(health.MyCurrentValue);
+
+                if (!IsAlive)
+                {
+                    Player.MyInstance.MyAttackers.Remove(this);
+                    Player.MyInstance.GainXP(XPManager.CalculateXP((this as Enemy)));
+                }
+            }
+
         }
 
     }
 
+    /// <summary>
+    /// Changes the enemys state
+    /// </summary>
+    /// <param name="newState">The new state</param>
     public void ChangeState(IState newState)
     {
-        if (currentState != null) 
+        if (currentState != null) //Makes sure we have a state before we call exit
         {
             currentState.Exit();
         }
 
+        //Sets the new state
         currentState = newState;
 
+        //Calls enter on the new state
         currentState.Enter(this);
     }
 
@@ -114,16 +182,46 @@ public class Enemy : NPC
         OnHealthChanged(health.MyCurrentValue);
     }
 
-    public override void Interact()
+    public void Interact()
     {
         if (!IsAlive)
         {
-            lootTable.ShowLoot();
+            List<Drop> drops = new List<Drop>();
+
+            foreach (IInteractable interactable in Player.MyInstance.MyInteractables)
+            {
+                if (interactable is Enemy && !(interactable as Enemy).IsAlive)
+                {
+                    drops.AddRange((interactable as Enemy).lootTable.GetLoot());
+                }
+            }
+
+            LootWindow.MyInstance.CreatePages(drops);
+
         }
     }
 
-    public override void StopInteract()
+    public void StopInteract()
     {
         LootWindow.MyInstance.Close();
+    }
+
+    public void OnHealthChanged(float health)
+    {
+        if (healthChanged != null)
+        {
+            healthChanged(health);
+        }
+
+    }
+
+    public void OnCharacterRemoved()
+    {
+        if (characterRemoved != null)
+        {
+            characterRemoved();
+        }
+
+        Destroy(gameObject);
     }
 }

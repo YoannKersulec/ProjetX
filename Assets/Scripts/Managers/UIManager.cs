@@ -21,13 +21,23 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// A reference to all the action buttons
+    /// </summary>
     [SerializeField]
     private ActionButton[] actionButtons;
+
+    [SerializeField]
+    private CanvasGroup[] menus;
+
 
     [SerializeField]
     private GameObject targetFrame;
 
     private Stat healthStat;
+
+    [SerializeField]
+    private Text levelText;
 
     [SerializeField]
     private Image portraitFrame;
@@ -43,12 +53,18 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private RectTransform tooltipRect;
 
+    /// <summary>
+    /// A reference to the keybind menu
+    /// </summary>
     [SerializeField]
     private CanvasGroup keybindMenu;
 
     [SerializeField]
     private CanvasGroup spellBook;
 
+    /// <summary>
+    /// A reference to all the kibind buttons on the menu
+    /// </summary>
     private GameObject[] keybindButtons;
 
     private void Awake()
@@ -57,20 +73,22 @@ public class UIManager : MonoBehaviour
         tooltipText = tooltip.GetComponentInChildren<Text>();
     }
 
+    // Use this for initialization
     void Start()
     {
         healthStat = targetFrame.GetComponentInChildren<Stat>();
     }
 
+    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            OpenClose(keybindMenu);
+            OpenClose(menus[0]);
         }
-        if (Input.GetKeyDown(KeyCode.P))
+        if (Input.GetKeyDown(KeyCode.I))
         {
-            OpenClose(spellBook);
+            OpenClose(menus[1]);
         }
         if (Input.GetKeyDown(KeyCode.B))
         {
@@ -78,11 +96,29 @@ public class UIManager : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.C))
         {
-            charPanel.OpenClose();
+            OpenClose(menus[2]);
         }
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            OpenClose(menus[3]);
+        }
+
+        //if (Input.GetKeyDown(KeyCode.Escape))
+        //{
+        //    OpenClose(keybindMenu);
+        //}
+        //if (Input.GetKeyDown(KeyCode.I))
+        //{
+        //    OpenClose(spellBook);
+        //}
+
+        //if (Input.GetKeyDown(KeyCode.C))
+        //{
+        //    charPanel.OpenClose();
+        //}
     }
 
-    public void ShowTargetFrame(NPC target)
+    public void ShowTargetFrame(Enemy target)
     {
         targetFrame.SetActive(true);
 
@@ -90,9 +126,32 @@ public class UIManager : MonoBehaviour
 
         portraitFrame.sprite = target.MyPortrait;
 
+        levelText.text = target.MyLevel.ToString();
+
         target.healthChanged += new HealthChanged(UpdateTargetFrame);
 
         target.characterRemoved += new CharacterRemoved(HideTargetFrame);
+
+        if (target.MyLevel >= Player.MyInstance.MyLevel + 5)
+        {
+            levelText.color = Color.red;
+        }
+        else if (target.MyLevel == Player.MyInstance.MyLevel + 3 || target.MyLevel == Player.MyInstance.MyLevel + 4)
+        {
+            levelText.color = new Color32(255, 124, 0, 255);
+        }
+        else if (target.MyLevel >= Player.MyInstance.MyLevel -2 && target.MyLevel <= Player.MyInstance.MyLevel+2)
+        {
+            levelText.color = Color.yellow;
+        }
+        else if (target.MyLevel <= Player.MyInstance.MyLevel-3 && target.MyLevel > XPManager.CalculateGrayLevel())
+        {
+            levelText.color = Color.green;
+        }
+        else
+        {
+            levelText.color = Color.grey;
+        }
     }
 
     public void HideTargetFrame()
@@ -100,11 +159,20 @@ public class UIManager : MonoBehaviour
         targetFrame.SetActive(false);
     }
 
+    /// <summary>
+    /// Updates the targetframe
+    /// </summary>
+    /// <param name="health"></param>
     public void UpdateTargetFrame(float health)
     {
         healthStat.MyCurrentValue = health;
     }
 
+    /// <summary>
+    /// Updates the text on a keybindbutton after the key has been changed
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="code"></param>
     public void UpdateKeyText(string key, KeyCode code)
     {
         Text tmp = Array.Find(keybindButtons, x => x.name == key).GetComponentInChildren<Text>();
@@ -122,20 +190,42 @@ public class UIManager : MonoBehaviour
         canvasGroup.blocksRaycasts = canvasGroup.blocksRaycasts == true ? false : true;
     }
 
+    public void OpenSingle(CanvasGroup canvasGroup)
+    {
+        foreach (CanvasGroup canvas in menus)
+        {
+            CloseSingle(canvas);
+        }
+
+        canvasGroup.alpha = canvasGroup.alpha > 0 ? 0 : 1;
+        canvasGroup.blocksRaycasts = canvasGroup.blocksRaycasts == true ? false : true;
+    }
+
+    public void CloseSingle(CanvasGroup canvasGroup)
+    {
+        canvasGroup.alpha  = 0;
+        canvasGroup.blocksRaycasts = false;
+
+    }
+
+    /// <summary>
+    /// Updates the stacksize on a clickable slot
+    /// </summary>
+    /// <param name="clickable"></param>
     public void UpdateStackSize(IClickable clickable)
     {
-        if (clickable.MyCount > 1) 
+        if (clickable.MyCount > 1) //If our slot has more than one item on it
         {
             clickable.MyStackText.text = clickable.MyCount.ToString();
             clickable.MyStackText.color = Color.white;
             clickable.MyIcon.color = Color.white;
         }
-        else 
+        else //If it only has 1 item on it
         {
             clickable.MyStackText.color = new Color(0, 0, 0, 0);
             clickable.MyIcon.color = Color.white;
         }
-        if (clickable.MyCount == 0) 
+        if (clickable.MyCount == 0) //If the slot is empty, then we need to hide the icon
         {
             clickable.MyIcon.color = new Color(0, 0, 0, 0);
             clickable.MyStackText.color = new Color(0, 0, 0, 0);
@@ -148,7 +238,10 @@ public class UIManager : MonoBehaviour
         clickable.MyIcon.color = Color.white;
     }
 
-    public void ShowToolitip(Vector2 pivot, Vector3 position, IDescribable description)
+    /// <summary>
+    /// Shows the tooltip
+    /// </summary>
+    public void ShowTooltip(Vector2 pivot, Vector3 position, IDescribable description)
     {
         tooltipRect.pivot = pivot;
         tooltip.SetActive(true);
@@ -156,6 +249,9 @@ public class UIManager : MonoBehaviour
         tooltipText.text = description.GetDescription();
     }
 
+    /// <summary>
+    /// Hides the tooltip
+    /// </summary>
     public void HideTooltip()
     {
         tooltip.SetActive(false);

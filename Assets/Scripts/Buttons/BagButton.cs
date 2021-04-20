@@ -4,14 +4,23 @@ using UnityEngine.UI;
 
 public class BagButton : MonoBehaviour, IPointerClickHandler
 {
+    /// <summary>
+    /// A reference to the bag item
+    /// </summary>
     private Bag bag;
 
+    /// <summary>
+    /// Sprites to indicate if the bag is full or empty
+    /// </summary>
     [SerializeField]
     private Sprite full, empty;
     
     [SerializeField]
     private int bagIndex;
 
+    /// <summary>
+    /// A property for accessing the specific bag
+    /// </summary>
     public Bag MyBag
     {
         get
@@ -47,6 +56,10 @@ public class BagButton : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    /// <summary>
+    /// if we click the specific bag button
+    /// </summary>
+    /// <param name="eventData"></param>
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Left)
@@ -71,8 +84,9 @@ public class BagButton : MonoBehaviour, IPointerClickHandler
             {
                 HandScript.MyInstance.TakeMoveable(MyBag);
             }
-            else if (bag != null)
+            else if (bag != null)//If we have a bag equipped
             {
+                //Open or close the bag
                 bag.MyBagScript.OpenClose();
             }
 
@@ -81,6 +95,9 @@ public class BagButton : MonoBehaviour, IPointerClickHandler
   
     }
 
+    /// <summary>
+    /// Removes the bag from the bagbar
+    /// </summary>
     public void RemoveBag()
     {
         InventoryScript.MyInstance.RemoveBag(MyBag);
