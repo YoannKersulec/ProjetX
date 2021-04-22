@@ -5,21 +5,12 @@ using UnityEngine;
 [CreateAssetMenu(fileName ="Bag",menuName ="Items/Bag",order =1)]
 public class Bag : Item, IUseable
 {
-    /// <summary>
-    /// The amount of slots this bag has
-    /// </summary>
     [SerializeField]
     private int slots;
 
-    /// <summary>
-    /// A reference to a bag prefab, so that we can instanitate a bag in the game
-    /// </summary>
     [SerializeField]
     private GameObject bagPrefab;
 
-    /// <summary>
-    /// A reference to the bagScript, that this bag belongs to
-    /// </summary>
     public BagScript MyBagScript { get; set; }
 
     /// <summary>
