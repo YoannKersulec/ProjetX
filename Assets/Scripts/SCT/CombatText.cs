@@ -14,16 +14,13 @@ public class CombatText : MonoBehaviour {
     [SerializeField]
     private Text text;
 
-
-
-	// Use this for initialization
+    
 	void Start ()
     {
         StartCoroutine(FadeOut());
 		
 	}
 	
-	// Update is called once per frame
 	void Update ()
     {
         Move();

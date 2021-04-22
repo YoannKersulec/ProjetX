@@ -200,9 +200,6 @@ public abstract class Character : MonoBehaviour
 
     }
 
-    /// <summary>
-    /// Activates an animation layer based on a string
-    /// </summary>
     public virtual void ActivateLayer(string layerName)
     {
         for (int i = 0; i < MyAnimator.layerCount; i++)
@@ -213,10 +210,6 @@ public abstract class Character : MonoBehaviour
         MyAnimator.SetLayerWeight(MyAnimator.GetLayerIndex(layerName),1);
     }
 
-    /// <summary>
-    /// Makes the character take damage
-    /// </summary>
-    /// <param name="damage"></param>
     public virtual void TakeDamage(float damage, Transform source)
     {
         health.MyCurrentValue -= damage;
@@ -225,7 +218,6 @@ public abstract class Character : MonoBehaviour
 
         if (health.MyCurrentValue <= 0)
         {
-            //Makes sure that the character stops moving when its dead
             Direction = Vector2.zero;
             myRigidbody.velocity = Direction;
             GameManager.MyInstance.OnKillConfirmed(this);

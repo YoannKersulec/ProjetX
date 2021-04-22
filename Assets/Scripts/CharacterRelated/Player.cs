@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// This is the player script, it contains functionality that is specific to the Player
-/// </summary>
+
 public class Player : Character
 {
     private static Player instance;
@@ -25,9 +23,6 @@ public class Player : Character
 
     private List<Enemy> attackers = new List<Enemy>();
 
-    /// <summary>
-    /// The player's mana
-    /// </summary>
     [SerializeField]
     private Stat mana;
 
@@ -37,20 +32,11 @@ public class Player : Character
     [SerializeField]
     private Text levelText;
 
-    /// <summary>
-    /// The player's initial mana
-    /// </summary>
     private float initMana = 50;
 
-    /// <summary>
-    /// An array of blocks used for blocking the player's sight
-    /// </summary>
     [SerializeField]
     private Block[] blocks;
 
-    /// <summary>
-    /// Exit points for the spells
-    /// </summary>
     [SerializeField]
     private Transform[] exitPoints;
 
@@ -60,9 +46,6 @@ public class Player : Character
     [SerializeField]
     private Transform minimapIcon;
 
-    /// <summary>
-    /// Index that keeps track of which exit point to use, 2 is default down
-    /// </summary>
     private int exitIndex = 2;
 
 
@@ -127,15 +110,10 @@ public class Player : Character
         }
     }
 
-    /// <summary>
-    /// We are overriding the characters update function, so that we can execute our own functions
-    /// </summary>
     protected override void Update()
     {
-        //Executes the GetInput function
         GetInput();
 
-        //Clamps the player inside the tilemap
         transform.position = new Vector3(Mathf.Clamp(transform.position.x, min.x, max.x), 
             Mathf.Clamp(transform.position.y, min.y, max.y), 
             transform.position.z);
@@ -152,14 +130,11 @@ public class Player : Character
         levelText.text = MyLevel.ToString();
     }
 
-    /// <summary>
-    /// Listen's to the players input
-    /// </summary>
     private void GetInput()
     {
         Direction = Vector2.zero;
 
-        ///THIS IS USED FOR DEBUGGING ONLY
+
         if (Input.GetKeyDown(KeyCode.KeypadMinus))
         {
             health.MyCurrentValue -= 10;
@@ -175,13 +150,13 @@ public class Player : Character
             MyMana.MyCurrentValue += 10;
         }
 
-        if (Input.GetKey(KeybindManager.MyInstance.Keybinds["UP"])) //Moves up
+        if (Input.GetKey(KeybindManager.MyInstance.Keybinds["UP"]))
         {
             exitIndex = 0;
             Direction += Vector2.up;
             minimapIcon.eulerAngles = new Vector3(0, 0, 0);
         }
-        if (Input.GetKey(KeybindManager.MyInstance.Keybinds["LEFT"])) //Moves left
+        if (Input.GetKey(KeybindManager.MyInstance.Keybinds["LEFT"])) 
         {
             exitIndex = 3;
             Direction += Vector2.left;
@@ -198,7 +173,7 @@ public class Player : Character
 
             minimapIcon.eulerAngles = new Vector3(0, 0, 180);
         }
-        if (Input.GetKey(KeybindManager.MyInstance.Keybinds["RIGHT"])) //Moves right
+        if (Input.GetKey(KeybindManager.MyInstance.Keybinds["RIGHT"]))
         {
             exitIndex = 1;
             Direction += Vector2.right;
@@ -225,38 +200,29 @@ public class Player : Character
 
     }
 
-    /// <summary>
-    /// Set's the player's limits so that he can't leave the game world
-    /// </summary>
-    /// <param name="min">The minimum position of the player</param>
-    /// <param name="max">The maximum postion of the player</param>
     public void SetLimits(Vector3 min, Vector3 max)
     {
         this.min = min;
         this.max = max;
     }
 
-    /// <summary>
-    /// A co routine for attacking
-    /// </summary>
-    /// <returns></returns>
+
     private IEnumerator Attack(string spellName)
     {
         Transform currentTarget = MyTarget;
 
-        //Creates a new spell, so that we can use the information form it to cast it in the game
         Spell newSpell = SpellBook.MyInstance.CastSpell(spellName);
 
-        IsAttacking = true; //Indicates if we are attacking
+        IsAttacking = true;
 
-        MyAnimator.SetBool("attack", IsAttacking); //Starts the attack animation
+        MyAnimator.SetBool("attack", IsAttacking);
 
         foreach (GearSocket g in gearSockets)
         {
             g.MyAnimator.SetBool("attack", IsAttacking);
         }
 
-        yield return new WaitForSeconds(newSpell.MyCastTime); //This is a hardcoded cast time, for debugging
+        yield return new WaitForSeconds(newSpell.MyCastTime);
 
         if (currentTarget != null && InLineOfSight())
         {
@@ -265,40 +231,36 @@ public class Player : Character
             s.Initialize(currentTarget, newSpell.MyDamage, transform);
         }
 
-        StopAttack(); //Ends the attack
+        StopAttack();
     }
 
     private IEnumerator GatherRoutine(string skillName, List<Drop> items)
     {
         Transform currentTarget = MyTarget;
 
-        //Creates a new spell, so that we can use the information form it to cast it in the game
         Spell newSpell = SpellBook.MyInstance.CastSpell(skillName);
 
-        IsAttacking = true; //Indicates if we are attacking
+        IsAttacking = true;
 
-        MyAnimator.SetBool("attack", IsAttacking); //Starts the attack animation
+        MyAnimator.SetBool("attack", IsAttacking);
 
         foreach (GearSocket g in gearSockets)
         {
             g.MyAnimator.SetBool("attack", IsAttacking);
         }
 
-        yield return new WaitForSeconds(newSpell.MyCastTime); //This is a hardcoded cast time, for debugging
+        yield return new WaitForSeconds(newSpell.MyCastTime);
 
-        StopAttack(); //Ends the attack
+        StopAttack();
 
         LootWindow.MyInstance.CreatePages(items);
     }
 
-    /// <summary>
-    /// Casts a spell
-    /// </summary>
     public void CastSpell(string spellName)
     {
         Block();
 
-        if (MyTarget != null && MyTarget.GetComponentInParent<Character>().IsAlive &&!IsAttacking && !IsMoving && InLineOfSight()) //Chcks if we are able to attack
+        if (MyTarget != null && MyTarget.GetComponentInParent<Character>().IsAlive &&!IsAttacking && !IsMoving && InLineOfSight())
         {
             actionRoutine = StartCoroutine(Attack(spellName));
         }
@@ -312,35 +274,23 @@ public class Player : Character
         }
     }
 
-    /// <summary>
-    /// Checks if the target is in line of sight
-    /// </summary>
-    /// <returns></returns>
     private bool InLineOfSight()
     {
         if (MyTarget != null)
         {
-            //Calculates the target's direction
             Vector3 targetDirection = (MyTarget.transform.position - transform.position).normalized;
 
-            //Thorws a raycast in the direction of the target
             RaycastHit2D hit = Physics2D.Raycast(transform.position, targetDirection, Vector2.Distance(transform.position, MyTarget.transform.position), 256);
 
-            //If we didn't hit the block, then we can cast a spell
             if (hit.collider == null)
             {
                 return true;
             }
 
         }
-
-        //If we hit the block we can't cast a spell
         return false;
     }
 
-    /// <summary>
-    /// Changes the blocks based on the players direction
-    /// </summary>
     private void Block()
     {
         foreach (Block b in blocks)
@@ -351,17 +301,13 @@ public class Player : Character
         blocks[exitIndex].Activate();
     }
 
-    /// <summary>
-    /// Stops the attack
-    /// </summary>
     public void StopAttack()
     {
-        //Stop the spellbook from casting
         SpellBook.MyInstance.StopCating();
 
-        IsAttacking = false; //Makes sure that we are not attacking
+        IsAttacking = false; 
 
-        MyAnimator.SetBool("attack", IsAttacking); //Stops the attack animation
+        MyAnimator.SetBool("attack", IsAttacking);
 
         foreach (GearSocket g in gearSockets)
         {
@@ -369,7 +315,7 @@ public class Player : Character
         }
 
 
-        if (actionRoutine != null) //Checks if we have a reference to an co routine
+        if (actionRoutine != null) 
         {
             StopCoroutine(actionRoutine);
         }

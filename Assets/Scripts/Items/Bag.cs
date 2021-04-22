@@ -13,14 +13,8 @@ public class Bag : Item, IUseable
 
     public BagScript MyBagScript { get; set; }
 
-    /// <summary>
-    /// A reference to the bag button this bag is attached to
-    /// </summary>
     public BagButton MyBagButton { get; set; }
 
-    /// <summary>
-    /// Property for getting the slots
-    /// </summary>
     public int MySlotCount
     {
         get
@@ -29,18 +23,11 @@ public class Bag : Item, IUseable
         }
     }
 
-    /// <summary>
-    /// Initializes the bag with an amount of slots
-    /// </summary>
-    /// <param name="slots"></param>
     public void Initialize(int slots)
     {
         this.slots = slots;
     }
 
-    /// <summary>
-    /// Equipts the bag
-    /// </summary>
     public void Use()
     {
         if (InventoryScript.MyInstance.CanAddBag)

@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-/// <summary>
-/// Enum for declaring the quality of the item
-/// </summary>
 public enum Quality { Common, Uncommon, Rare, Epic }
 
 public static class QualityColor

@@ -13,9 +13,6 @@ public class GameManager : MonoBehaviour {
 
     private static GameManager instance;
 
-    /// <summary>
-    /// A reference to the player object
-    /// </summary>
     [SerializeField]
     private Player player;
 
@@ -40,10 +37,8 @@ public class GameManager : MonoBehaviour {
         mainCamera = Camera.main;
     }
 
-    // Update is called once per frame
     void Update ()
     {
-        //Executes click target
         ClickTarget();
 
         NextTarget();
@@ -51,31 +46,29 @@ public class GameManager : MonoBehaviour {
 
     private void ClickTarget()
     {
-        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())//If we click the left mouse button
+        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
         {
-            //Makes a raycast from the mouse position into the game world
+
             RaycastHit2D hit = Physics2D.Raycast(mainCamera.ScreenToWorldPoint(Input.mousePosition),Vector2.zero,Mathf.Infinity,512);
 
-            if (hit.collider != null && hit.collider.tag == "Enemy")//If we hit something
+            if (hit.collider != null && hit.collider.tag == "Enemy")
             {
                 DeSelectTarget();
 
                 SelectTarget(hit.collider.GetComponent<Enemy>());
             }
-            else//Deselect the target
+            else
             {
                 UIManager.MyInstance.HideTargetFrame();
 
                 DeSelectTarget();
 
-                //We remove the references to the target
                 currentTarget = null;
                 player.MyTarget = null;
             }
         }
         else if (Input.GetMouseButtonDown(1) && !EventSystem.current.IsPointerOverGameObject())
         {
-            //Makes a raycast from the mouse position into the game world
             RaycastHit2D hit = Physics2D.Raycast(mainCamera.ScreenToWorldPoint(Input.mousePosition), Vector2.zero, Mathf.Infinity, 512);
 
             if (hit.collider != null)

@@ -27,7 +27,6 @@ public class CombatTextManager : MonoBehaviour
 
     public void CreateText(Vector2 position, string text, SCTTYPE type, bool crit)
     {
-        //Offset
         position.y += 0.8f;
         Text sct = Instantiate(combatTextPrefab, transform).GetComponent<Text>();
         sct.transform.position = position;

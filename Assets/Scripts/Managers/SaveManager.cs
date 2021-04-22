@@ -32,7 +32,6 @@ public class SaveManager : MonoBehaviour
 
     private string action;
 
-    // Use this for initialization
     void Awake()
     {
         chests = FindObjectsOfType<Chest>();
@@ -40,7 +39,6 @@ public class SaveManager : MonoBehaviour
 
         foreach (SavedGame saved in saveSlots)
         {
-            //We need to show the saved files here
             ShowSavedFiles(saved);
         }
 
@@ -310,7 +308,6 @@ public class SaveManager : MonoBehaviour
         }
         catch (System.Exception)
         {
-            //This is for handling errors
 
             throw;
         }

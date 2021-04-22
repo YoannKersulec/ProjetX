@@ -12,28 +12,17 @@ public class Enemy : Character, IInteractable
 
     public event CharacterRemoved characterRemoved;
 
-    /// <summary>
-    /// A canvasgroup for the healthbar
-    /// </summary>
     [SerializeField]
     private CanvasGroup healthGroup;
 
-    /// <summary>
-    /// The enemys current state
-    /// </summary>
     private IState currentState;
 
     [SerializeField]
     private LootTable lootTable;
 
-    /// <summary>
-    /// The enemys attack range
-    /// </summary>
+
     public float MyAttackRange { get; set; }
 
-    /// <summary>
-    /// How much time has passed since the last attack
-    /// </summary>
     public float MyAttackTime { get; set; }
 
     public Vector3 MyStartPosition { get; set; }
@@ -91,24 +80,16 @@ public class Enemy : Character, IInteractable
 
     }
 
-    /// <summary>
-    /// When the enemy is selected
-    /// </summary>
-    /// <returns></returns>
     public Transform Select()
     {
-        //Shows the health bar
         healthGroup.alpha = 1;
 
         return hitBox;
     }
 
-    /// <summary>
-    /// When we deselect our enemy
-    /// </summary>
     public void DeSelect()
     {
-        //Hides the healthbar
+
         healthGroup.alpha = 0;
 
         healthChanged -= new HealthChanged(UIManager.MyInstance.UpdateTargetFrame);
@@ -118,10 +99,6 @@ public class Enemy : Character, IInteractable
     }
 
 
-    /// <summary>
-    /// Makes the enemy take damage when hit
-    /// </summary>
-    /// <param name="damage"></param>
     public override void TakeDamage(float damage, Transform source)
     {
         if (!(currentState is EvadeState))
@@ -145,21 +122,16 @@ public class Enemy : Character, IInteractable
 
     }
 
-    /// <summary>
-    /// Changes the enemys state
-    /// </summary>
-    /// <param name="newState">The new state</param>
+
     public void ChangeState(IState newState)
     {
-        if (currentState != null) //Makes sure we have a state before we call exit
+        if (currentState != null) 
         {
             currentState.Exit();
         }
 
-        //Sets the new state
         currentState = newState;
 
-        //Calls enter on the new state
         currentState.Enter(this);
     }
 
