@@ -7,13 +7,14 @@ static class XPManager
 {
     public static int CalculateXP(Enemy e)
     {
-        
+        //  XP = (Char Level * 5) +45, where Char Level = Mob Level, for mobs in Azeroth 
         int baseXP = (Player.MyInstance.MyLevel * 5) + 45;
 
         int grayLevel = CalculateGrayLevel();
 
         int totalXP = 0;
 
+        //XP = (Base XP) *(1 + 0.05 * (Mob Level - Char Level) ), where Mob Level > Char Level
 
         if (e.MyLevel >= Player.MyInstance.MyLevel)
         {

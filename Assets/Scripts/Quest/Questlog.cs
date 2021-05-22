@@ -166,6 +166,9 @@ public class Questlog : MonoBehaviour
 
     public void AbandonQuest()
     {
+        //Removes the quest from the quest log
+        //Remember to remove the quest from the quest list
+
         foreach (CollectObjective o in selected.MyCollectObjectives)
         {
             InventoryScript.MyInstance.itemCountChangedEvent -= new ItemCountChanged(o.UpdateItemCount);
@@ -186,7 +189,7 @@ public class Questlog : MonoBehaviour
         Destroy(qs.gameObject);
         MyQuests.Remove(qs.MyQuest);
         questDescription.text = string.Empty;
-        selected = null;
+        selected = null; //Deselectring the quest
         currentCount--;
         questCountTxt.text = currentCount + "/" + maxCount;
         qs.MyQuest.MyQuestGiver.UpdateQuestStatus();

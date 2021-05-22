@@ -50,7 +50,7 @@ public class GatherLootTable : LootTable, IInteractable
 
     public void Interact()
     {
-        Player.MyInstance.Gather("Gather", MyDroppedItems);
+        Player.MyInstance.Gather(SpellBook.MyInstance.GetSpell("Gather"), MyDroppedItems);
         LootWindow.MyInstance.MyInteractable = this;
     }
 

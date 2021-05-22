@@ -36,4 +36,19 @@ public class MessageFeedManager : MonoBehaviour {
         Destroy(go, 2);
 
     }
+
+    public void WriteMessage(string message, Color color)
+    {
+
+        GameObject go = Instantiate(messagePrefab, transform);
+        Text t = go.GetComponent<Text>();
+
+        t.text = message;
+        t.color = color;
+
+        go.transform.SetAsFirstSibling();
+
+        Destroy(go, 2);
+
+    }
 }

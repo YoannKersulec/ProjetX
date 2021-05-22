@@ -16,6 +16,9 @@ public class SlotScript : MonoBehaviour, IPointerClickHandler, IClickable, IPoin
     private Image icon;
 
     [SerializeField]
+    private Image cover;
+
+    [SerializeField]
     private Text stackSize;
 
     /// <summary>
@@ -113,18 +116,31 @@ public class SlotScript : MonoBehaviour, IPointerClickHandler, IClickable, IPoin
         }
     }
 
+    public Image MyCover
+    {
+        get
+        {
+            return cover;
+        }
+    }
+
     private void Awake()
     {
+        //Assigns all the event on our observable stack to the updateSlot function
         MyItems.OnPop += new UpdateStackEvent(UpdateSlot);
         MyItems.OnPush += new UpdateStackEvent(UpdateSlot);
         MyItems.OnClear += new UpdateStackEvent(UpdateSlot);
     }
 
+    /// <summary>
+    /// Whem the slot is clicked
+    /// </summary>
+    /// <param name="eventData"></param>
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            if (InventoryScript.MyInstance.FromSlot == null && !IsEmpty)
+            if (InventoryScript.MyInstance.FromSlot == null && !IsEmpty) //If we don't have something to move
             {
                 if (HandScript.MyInstance.MyMoveable != null )
                 {
@@ -157,8 +173,10 @@ public class SlotScript : MonoBehaviour, IPointerClickHandler, IClickable, IPoin
             {
                 if (HandScript.MyInstance.MyMoveable is Bag)
                 {
+                    //Dequips a bag from the inventory
                     Bag bag = (Bag)HandScript.MyInstance.MyMoveable;
 
+                    //Makes sure we cant dequip it into itself and that we have enough space for the items from the dequipped bag
                     if (bag.MyBagScript != MyBag && InventoryScript.MyInstance.MyEmptySlotCount - bag.MySlotCount > 0)
                     {
                         AddItem(bag);
@@ -176,8 +194,9 @@ public class SlotScript : MonoBehaviour, IPointerClickHandler, IClickable, IPoin
 
 
             }
-            else if (InventoryScript.MyInstance.FromSlot != null)
+            else if (InventoryScript.MyInstance.FromSlot != null)//If we have something to move
             {
+                //We will try to do diffrent things to place the item back into the inventory
                 if (PutItemBack() || MergeItems(InventoryScript.MyInstance.FromSlot) ||SwapItems(InventoryScript.MyInstance.FromSlot) ||AddItems(InventoryScript.MyInstance.FromSlot.MyItems))
                 {
                     HandScript.MyInstance.Drop();
@@ -186,21 +205,32 @@ public class SlotScript : MonoBehaviour, IPointerClickHandler, IClickable, IPoin
             }
       
         }
-        if (eventData.button == PointerEventData.InputButton.Right && HandScript.MyInstance.MyMoveable == null)
+        if (eventData.button == PointerEventData.InputButton.Right && HandScript.MyInstance.MyMoveable == null)//If we rightclick on the slot
         {
             UseItem();
         }
     }
 
+    /// <summary>
+    /// Adds an item to the slot
+    /// </summary>
+    /// <param name="item">the item to add</param>
+    /// <returns>returns true if the item was added</returns>
     public bool AddItem(Item item)
     {
         MyItems.Push(item);
         icon.sprite = item.MyIcon;
         icon.color = Color.white;
+        MyCover.enabled = false;
         item.MySlot = this;
         return true;
     }
 
+    /// <summary>
+    /// Adds a stack of items to the slot
+    /// </summary>
+    /// <param name="newItems">stack to add</param>
+    /// <returns></returns>
     public bool AddItems(ObservableStack<Item> newItems)
     {
         if (IsEmpty || newItems.Peek().GetType() == MyItem.GetType())
@@ -223,6 +253,10 @@ public class SlotScript : MonoBehaviour, IPointerClickHandler, IClickable, IPoin
         return false;
     }
 
+    /// <summary>
+    /// Removes the item from the slot
+    /// </summary>
+    /// <param name="item"></param>
     public void RemoveItem(Item item)
     {
         if (!IsEmpty)
@@ -234,7 +268,7 @@ public class SlotScript : MonoBehaviour, IPointerClickHandler, IClickable, IPoin
     public void Clear()
     {
         int initCount = MyItems.Count;
-
+        MyCover.enabled = false;
         if (initCount > 0)
         {
             for (int i = 0; i < initCount; i++)
@@ -244,6 +278,9 @@ public class SlotScript : MonoBehaviour, IPointerClickHandler, IClickable, IPoin
         }
     }
 
+    /// <summary>
+    /// Uses the item if it is useable
+    /// </summary>
     public void UseItem()
     {
         if (MyItem is IUseable)
@@ -257,6 +294,11 @@ public class SlotScript : MonoBehaviour, IPointerClickHandler, IClickable, IPoin
       
     }
 
+    /// <summary>
+    /// Stacks two items
+    /// </summary>
+    /// <param name="item"></param>
+    /// <returns></returns>
     public bool StackItem(Item item)
     {
         if (!IsEmpty && item.name == MyItem.name && MyItems.Count < MyItem.MyStackSize)
@@ -269,30 +311,47 @@ public class SlotScript : MonoBehaviour, IPointerClickHandler, IClickable, IPoin
         return false;
     }
 
+    /// <summary>
+    /// Puts the item back in the inventory
+    /// </summary>
+    /// <returns></returns>
     private bool PutItemBack()
     {
+        MyCover.enabled = false;
         if (InventoryScript.MyInstance.FromSlot == this)
         {
-            InventoryScript.MyInstance.FromSlot.MyIcon.color = Color.white;
+            InventoryScript.MyInstance.FromSlot.MyIcon.enabled = true;
             return true;
         }
 
         return false;
     }
 
+    /// <summary>
+    /// Swaps two items in the inventory
+    /// </summary>
+    /// <param name="from"></param>
+    /// <returns></returns>
     private bool SwapItems(SlotScript from)
     {
+        from.MyCover.enabled = false;
         if (IsEmpty)
         {
             return false;
         }
         if (from.MyItem.GetType() != MyItem.GetType() || from.MyCount+MyCount > MyItem.MyStackSize)
         {
+            //Copy all the items we need to swap from A
             ObservableStack<Item> tmpFrom = new ObservableStack<Item>(from.MyItems);
+
+            //Clear Slot a
             from.MyItems.Clear();
+            //All items from slot b and copy them into A
             from.AddItems(MyItems);
 
+            //Clear B
             MyItems.Clear();
+            //Move the items from ACopy to B
             AddItems(tmpFrom);
 
             return true;
@@ -301,6 +360,11 @@ public class SlotScript : MonoBehaviour, IPointerClickHandler, IClickable, IPoin
         return false;
     }
 
+    /// <summary>
+    /// Merges two identical stacks of items
+    /// </summary>
+    /// <param name="from">Slot to merge from</param>
+    /// <returns></returns>
     private bool MergeItems(SlotScript from)
     {
         if (IsEmpty)
@@ -309,6 +373,7 @@ public class SlotScript : MonoBehaviour, IPointerClickHandler, IClickable, IPoin
         }
         if (from.MyItem.GetType() == MyItem.GetType() && !IsFull && from.MyItem.MyTitle == MyItem.MyTitle)
         {
+            //How many free slots do we have in the stack
             int free = MyItem.MyStackSize - MyCount;
 
             for (int i = 0; i < free; i++)
@@ -322,6 +387,9 @@ public class SlotScript : MonoBehaviour, IPointerClickHandler, IClickable, IPoin
         return false;
     }
 
+    /// <summary>
+    /// Updates the the slot
+    /// </summary>
     private void UpdateSlot()
     {
         UIManager.MyInstance.UpdateStackSize(this);
@@ -329,6 +397,7 @@ public class SlotScript : MonoBehaviour, IPointerClickHandler, IClickable, IPoin
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        //We need to show tooltip
         if (!IsEmpty)
         {
             UIManager.MyInstance.ShowTooltip(new Vector2(1, 0),transform.position, MyItem);

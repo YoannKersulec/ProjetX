@@ -1,11 +1,11 @@
-﻿using System.Collections;
+﻿using Assets.Scripts.Debuffs;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
 /// This is an abstract class that all characters needs to inherit from
 /// </summary>
-[RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Animator))]
 public abstract class Character : MonoBehaviour
 {
@@ -27,6 +27,10 @@ public abstract class Character : MonoBehaviour
     /// </summary>
     public Animator MyAnimator { get; set; }
 
+    public Transform MyCurrentTile { get; set; }
+
+    public SpriteRenderer MySpriteRenderer { get; set; }
+
     /// <summary>
     /// The Player's direction
     /// </summary>
@@ -35,6 +39,7 @@ public abstract class Character : MonoBehaviour
     /// <summary>
     /// The Character's rigidbody
     /// </summary>
+    [SerializeField]
     private Rigidbody2D myRigidbody;
 
     /// <summary>
@@ -48,12 +53,20 @@ public abstract class Character : MonoBehaviour
     protected Coroutine actionRoutine;
 
     [SerializeField]
-    protected Transform hitBox;
+    private Transform hitBox;
 
     [SerializeField]
     protected Stat health;
 
-    public Transform MyTarget { get; set; }
+    public Character MyTarget { get; set; }
+
+    public Stack<Vector3> MyPath { get; set; }
+
+    private List<Debuff> debuffs = new List<Debuff>();
+
+    private List<Debuff> newDebuffs = new List<Debuff>();
+
+    private List<Debuff> expiredDebuffs = new List<Debuff>();
 
     public Stat MyHealth
     {
@@ -132,13 +145,32 @@ public abstract class Character : MonoBehaviour
         }
     }
 
+    public Rigidbody2D MyRigidbody
+    {
+        get
+        {
+            return myRigidbody;
+        }
+    }
+
+    public Transform MyHitbox
+    {
+        get
+        {
+            return hitBox;
+        }
+
+        set
+        {
+            hitBox = value;
+        }
+    }
+
     protected virtual void Start()
     {
-        //Makes a reference to the rigidbody2D
-        myRigidbody = GetComponent<Rigidbody2D>();
-
         //Makes a reference to the character's animator
         MyAnimator = GetComponent<Animator>();
+        MySpriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     /// <summary>
@@ -147,24 +179,29 @@ public abstract class Character : MonoBehaviour
     protected virtual void Update ()
     {
         HandleLayers();
+
+        HandleDebuffs();
 	}
 
-    private void FixedUpdate()
+    public void FixedUpdate()
     {
         Move();
     }
+
 
     /// <summary>
     /// Moves the player
     /// </summary>
     public void Move()
     {
-        if (IsAlive)
+        if (MyPath == null)
         {
-            //Makes sure that the player moves
-            myRigidbody.velocity = Direction.normalized * Speed;
+            if (IsAlive)
+            {
+                //Makes sure that the player moves
+                MyRigidbody.velocity = Direction.normalized * Speed;
+            }
         }
- 
     }
 
     /// <summary>
@@ -200,6 +237,47 @@ public abstract class Character : MonoBehaviour
 
     }
 
+    private void HandleDebuffs()
+    {
+
+        if (debuffs.Count > 0)
+        {
+            foreach (Debuff debuff in debuffs)
+            {
+                debuff.Update();
+            }
+        }
+
+        if (newDebuffs.Count > 0)
+        {
+            debuffs.AddRange(newDebuffs);
+            newDebuffs.Clear();
+        }
+
+        if (expiredDebuffs.Count > 0)
+        {
+            foreach (Debuff debuff in expiredDebuffs)
+            {
+                debuffs.Remove(debuff);
+            }
+
+            expiredDebuffs.Clear();
+        }
+    }
+
+    public void ApplyDebuff(Debuff debuff)
+    {
+        this.newDebuffs.Add(debuff);
+    }
+
+    public void RemoveDebuff(Debuff debuff)
+    {
+        this.expiredDebuffs.Add(debuff);
+    }
+
+    /// <summary>
+    /// Activates an animation layer based on a string
+    /// </summary>
     public virtual void ActivateLayer(string layerName)
     {
         for (int i = 0; i < MyAnimator.layerCount; i++)
@@ -210,7 +288,11 @@ public abstract class Character : MonoBehaviour
         MyAnimator.SetLayerWeight(MyAnimator.GetLayerIndex(layerName),1);
     }
 
-    public virtual void TakeDamage(float damage, Transform source)
+    /// <summary>
+    /// Makes the character take damage
+    /// </summary>
+    /// <param name="damage"></param>
+    public virtual void TakeDamage(float damage, Character source)
     {
         health.MyCurrentValue -= damage;
 
@@ -218,8 +300,9 @@ public abstract class Character : MonoBehaviour
 
         if (health.MyCurrentValue <= 0)
         {
+            //Makes sure that the character stops moving when its dead
             Direction = Vector2.zero;
-            myRigidbody.velocity = Direction;
+            MyRigidbody.velocity = Direction;
             GameManager.MyInstance.OnKillConfirmed(this);
             MyAnimator.SetTrigger("die");
         }

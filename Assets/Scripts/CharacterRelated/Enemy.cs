@@ -12,17 +12,39 @@ public class Enemy : Character, IInteractable
 
     public event CharacterRemoved characterRemoved;
 
+    /// <summary>
+    /// A canvasgroup for the healthbar
+    /// </summary>
     [SerializeField]
     private CanvasGroup healthGroup;
 
+    /// <summary>
+    /// The enemys current state
+    /// </summary>
     private IState currentState;
 
     [SerializeField]
     private LootTable lootTable;
 
+    [SerializeField]
+    private AStar astar;
 
-    public float MyAttackRange { get; set; }
+    //This is tmp for testing, later we will base damage on stats
+    [SerializeField]
+    protected int damage;
 
+    private bool canDoDamage = true;
+
+    /// <summary>
+    /// The enemys attack range
+    /// </summary>
+    [SerializeField]
+    private float attackRange;
+  
+
+    /// <summary>
+    /// How much time has passed since the last attack
+    /// </summary>
     public float MyAttackTime { get; set; }
 
     public Vector3 MyStartPosition { get; set; }
@@ -47,10 +69,31 @@ public class Enemy : Character, IInteractable
     {
         get
         {
-            return Vector2.Distance(transform.position, MyTarget.position) < MyAggroRange;
+            return Vector2.Distance(transform.position, MyTarget.transform.position) < MyAggroRange;
         }
     }
-    
+
+    public AStar MyAstar
+    {
+        get
+        {
+            return astar;
+        }
+    }
+
+    public float MyAttackRange
+    {
+        get
+        {
+            return attackRange;
+        }
+
+        set
+        {
+            attackRange = value;
+        }
+    }
+
     protected void Awake()
     {
         health.Initialize(initHealth, initHealth);
@@ -59,8 +102,13 @@ public class Enemy : Character, IInteractable
         sr.enabled = true;
         MyStartPosition = transform.position;
         MyAggroRange = initAggroRange;
-        MyAttackRange = 1;
         ChangeState(new IdleState());
+    }
+
+    protected override void Start()
+    {
+        base.Start();
+        MyAnimator.SetFloat("y", -1);
     }
 
     protected override void Update()
@@ -74,22 +122,35 @@ public class Enemy : Character, IInteractable
             }
 
             currentState.Update();
+
+            if (MyTarget != null && !Player.MyInstance.IsAlive)
+            {
+                ChangeState(new EvadeState());
+            }
         }
 
         base.Update();
 
     }
 
-    public Transform Select()
+    /// <summary>
+    /// When the enemy is selected
+    /// </summary>
+    /// <returns></returns>
+    public Character Select()
     {
+        //Shows the health bar
         healthGroup.alpha = 1;
 
-        return hitBox;
+        return this;
     }
 
+    /// <summary>
+    /// When we deselect our enemy
+    /// </summary>
     public void DeSelect()
     {
-
+        //Hides the healthbar
         healthGroup.alpha = 0;
 
         healthChanged -= new HealthChanged(UIManager.MyInstance.UpdateTargetFrame);
@@ -99,7 +160,11 @@ public class Enemy : Character, IInteractable
     }
 
 
-    public override void TakeDamage(float damage, Transform source)
+    /// <summary>
+    /// Makes the enemy take damage when hit
+    /// </summary>
+    /// <param name="damage"></param>
+    public override void TakeDamage(float damage, Character source)
     {
         if (!(currentState is EvadeState))
         {
@@ -122,24 +187,45 @@ public class Enemy : Character, IInteractable
 
     }
 
+    public void DoDamage()
+    {
+        if (canDoDamage)
+        {
+            MyTarget.TakeDamage(damage, this);
+            canDoDamage = false;
+        }
+      
+    }
 
+    public void CanDoDamage()
+    {
+        canDoDamage = true;
+    }
+       
+
+    /// <summary>
+    /// Changes the enemys state
+    /// </summary>
+    /// <param name="newState">The new state</param>
     public void ChangeState(IState newState)
     {
-        if (currentState != null) 
+        if (currentState != null) //Makes sure we have a state before we call exit
         {
             currentState.Exit();
         }
 
+        //Sets the new state
         currentState = newState;
 
+        //Calls enter on the new state
         currentState.Enter(this);
     }
 
-    public void SetTarget(Transform target)
+    public void SetTarget(Character target)
     {
         if (MyTarget == null && !(currentState is EvadeState))
         {
-            float distance = Vector2.Distance(transform.position, target.position);
+            float distance = Vector2.Distance(transform.position, target.transform.position);
             MyAggroRange = initAggroRange;
             MyAggroRange += distance;
             MyTarget = target;

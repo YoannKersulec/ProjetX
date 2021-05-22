@@ -5,6 +5,7 @@ using UnityEngine;
 public class ChestScript : BagScript
 {
 
+	// Use this for initialization
 	void Awake ()
     {
         AddSlots(48);

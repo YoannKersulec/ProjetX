@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class VendorWindow : Window
 {
-
-
     [SerializeField]
     private VendorButton[] vendorButtons;
 

@@ -3,14 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+//A delegate for creating event
 public delegate void UpdateStackEvent();
 
 public class ObservableStack<T> : Stack<T>
 {
+    /// <summary>
+    /// Event that is raised when we push something
+    /// </summary>
     public event UpdateStackEvent OnPush;
 
+    /// <summary>
+    /// Event that is raised when we pop something
+    /// </summary>
     public event UpdateStackEvent OnPop;
 
+    /// <summary>
+    /// Event that is raised when we clear the stack
+    /// </summary>
     public event UpdateStackEvent OnClear;
 
     public ObservableStack(ObservableStack<T> items) : base(items)
@@ -27,9 +37,9 @@ public class ObservableStack<T> : Stack<T>
     {
         base.Push(item);
 
-        if (OnPush != null)
+        if (OnPush != null) //Makes sure something is listening to the event before we call it
         {
-            OnPush();
+            OnPush(); //Calls the event
         }
     }
 
@@ -37,9 +47,9 @@ public class ObservableStack<T> : Stack<T>
     {
         T item = base.Pop();
 
-        if (OnPop != null)
+        if (OnPop != null) //Makes sure something is listening to the event before we call it
         {
-            OnPop();
+            OnPop();//Calls the event
         }
 
         return item;
@@ -49,9 +59,9 @@ public class ObservableStack<T> : Stack<T>
     {
         base.Clear();
 
-        if (OnClear != null)
+        if (OnClear != null)//Makes sure something is listening to the event before we call it
         {
-            OnClear();
+            OnClear();//Calls the event
         }
     }
 }

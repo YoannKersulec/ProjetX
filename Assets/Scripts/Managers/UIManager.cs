@@ -21,6 +21,9 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// A reference to all the action buttons
+    /// </summary>
     [SerializeField]
     private ActionButton[] actionButtons;
 
@@ -50,12 +53,9 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private RectTransform tooltipRect;
 
-    [SerializeField]
-    private CanvasGroup keybindMenu;
-
-    [SerializeField]
-    private CanvasGroup spellBook;
-
+    /// <summary>
+    /// A reference to all the kibind buttons on the menu
+    /// </summary>
     private GameObject[] keybindButtons;
 
     private void Awake()
@@ -64,11 +64,13 @@ public class UIManager : MonoBehaviour
         tooltipText = tooltip.GetComponentInChildren<Text>();
     }
 
+    // Use this for initialization
     void Start()
     {
         healthStat = targetFrame.GetComponentInChildren<Stat>();
     }
 
+    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -91,6 +93,15 @@ public class UIManager : MonoBehaviour
         {
             OpenClose(menus[3]);
         }
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            OpenClose(menus[6]);
+        }
+        if (Input.GetKeyDown(KeyCode.N))
+        {
+            OpenClose(menus[7]);
+        }
+
 
         //if (Input.GetKeyDown(KeyCode.Escape))
         //{
@@ -147,12 +158,21 @@ public class UIManager : MonoBehaviour
     {
         targetFrame.SetActive(false);
     }
-    
+
+    /// <summary>
+    /// Updates the targetframe
+    /// </summary>
+    /// <param name="health"></param>
     public void UpdateTargetFrame(float health)
     {
         healthStat.MyCurrentValue = health;
     }
-    
+
+    /// <summary>
+    /// Updates the text on a keybindbutton after the key has been changed
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="code"></param>
     public void UpdateKeyText(string key, KeyCode code)
     {
         Text tmp = Array.Find(keybindButtons, x => x.name == key).GetComponentInChildren<Text>();
@@ -187,33 +207,40 @@ public class UIManager : MonoBehaviour
         canvasGroup.blocksRaycasts = false;
 
     }
-    
+
+    /// <summary>
+    /// Updates the stacksize on a clickable slot
+    /// </summary>
+    /// <param name="clickable"></param>
     public void UpdateStackSize(IClickable clickable)
     {
-        if (clickable.MyCount > 1)
+        if (clickable.MyCount > 1) //If our slot has more than one item on it
         {
             clickable.MyStackText.text = clickable.MyCount.ToString();
-            clickable.MyStackText.color = Color.white;
-            clickable.MyIcon.color = Color.white;
+            clickable.MyStackText.enabled = true;
+            clickable.MyIcon.enabled = true;
         }
-        else
+        else //If it only has 1 item on it
         {
-            clickable.MyStackText.color = new Color(0, 0, 0, 0);
-            clickable.MyIcon.color = Color.white;
+            clickable.MyStackText.enabled = false;
+            clickable.MyIcon.enabled = true;
         }
-        if (clickable.MyCount == 0) 
+        if (clickable.MyCount == 0) //If the slot is empty, then we need to hide the icon
         {
-            clickable.MyIcon.color = new Color(0, 0, 0, 0);
-            clickable.MyStackText.color = new Color(0, 0, 0, 0);
+            clickable.MyStackText.enabled = false;
+            clickable.MyIcon.enabled = false;
         }
     }
 
     public void ClearStackCount(IClickable clickable)
     {
-        clickable.MyStackText.color = new Color(0, 0, 0, 0);
-        clickable.MyIcon.color = Color.white;
+        clickable.MyStackText.enabled = false;
+        clickable.MyIcon.enabled = true;
     }
-    
+
+    /// <summary>
+    /// Shows the tooltip
+    /// </summary>
     public void ShowTooltip(Vector2 pivot, Vector3 position, IDescribable description)
     {
         tooltipRect.pivot = pivot;
@@ -221,7 +248,10 @@ public class UIManager : MonoBehaviour
         tooltip.transform.position = position;
         tooltipText.text = description.GetDescription();
     }
-    
+
+    /// <summary>
+    /// Hides the tooltip
+    /// </summary>
     public void HideTooltip()
     {
         tooltip.SetActive(false);
