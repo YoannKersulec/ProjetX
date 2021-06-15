@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,7 +24,9 @@ public class Player : Character
         }
     }
 
-    private List<Enemy> attackers = new List<Enemy>();
+ 
+    #region STATS
+
 
     /// <summary>
     /// The player's mana
@@ -31,9 +34,25 @@ public class Player : Character
     [SerializeField]
     private Stat mana;
 
+    /// <summary>
+    /// The player's xpStat
+    /// </summary>
     [SerializeField]
     private Stat xpStat;
 
+    private int intellect;
+
+    private int stamina;
+
+    private int strength;
+
+    private int intellectMultiplier = 15;
+
+    #endregion
+
+    /// <summary>
+    /// The level text
+    /// </summary>
     [SerializeField]
     private Text levelText;
 
@@ -65,6 +84,9 @@ public class Player : Character
     [SerializeField]
     private Transform minimapIcon;
 
+    [SerializeField]
+    private Camera mainCam;
+
     /// <summary>
     /// Index that keeps track of which exit point to use, 2 is default down
     /// </summary>
@@ -95,7 +117,13 @@ public class Player : Character
     [SerializeField]
     private Profession profession;
 
+    private GameObject unusedSpell;
+
+    private Spell aoeSpell;
+
     public int MyGold { get; set; }
+
+    public bool InCombat { get; set; } = false;
 
     public List<IInteractable> MyInteractables
     {
@@ -136,17 +164,10 @@ public class Player : Character
         }
     }
 
-    public List<Enemy> MyAttackers
+    protected override void Start()
     {
-        get
-        {
-            return attackers;
-        }
-
-        set
-        {
-            attackers = value;
-        }
+        base.Start();
+        StartCoroutine(Regen());
     }
 
     /// <summary>
@@ -163,17 +184,72 @@ public class Player : Character
             Mathf.Clamp(transform.position.y, min.y, max.y),
             transform.position.z);
 
+        if (unusedSpell != null)
+        {
+            Vector3 mouseScreenPostion = mainCam.ScreenToWorldPoint(Input.mousePosition);
+            unusedSpell.transform.position = new Vector3(mouseScreenPostion.x, mouseScreenPostion.y, 0);
+
+            float distance = Vector2.Distance(transform.position, mainCam.ScreenToWorldPoint(Input.mousePosition));
+
+            if (distance >= aoeSpell.MyRange)
+            {
+                unusedSpell.GetComponent<AOESpell>().OutOfRange();
+            }
+            else
+            {
+                unusedSpell.GetComponent<AOESpell>().InRange();
+            }
+
+            if (Input.GetMouseButtonDown(0) && distance <= aoeSpell.MyRange)
+            {
+                AOESpell s = Instantiate(aoeSpell.MySpellPrefab, unusedSpell.transform.position, Quaternion.identity).GetComponent<AOESpell>();
+                Destroy(unusedSpell);
+                unusedSpell = null;
+                s.Initialize(aoeSpell.MyDamage, aoeSpell.MyDuration);
+                mana.MyCurrentValue -= aoeSpell.ManaCost;
+            }
+        }
+
         base.Update();
     }
 
     public void SetDefaultValues()
     {
         MyGold = 1000;
-        health.Initialize(initHealth, initHealth);
-        MyMana.Initialize(initMana, initMana);
+        stamina = 50;
+        intellect = 10;
+        strength = 0;
+        ResetStats();
         MyXp.Initialize(0, Mathf.Floor(100 * MyLevel * Mathf.Pow(MyLevel, 0.5f)));
         levelText.text = MyLevel.ToString();
         initPos = transform.parent.position;
+        UIManager.MyInstance.UpdateStatsText(intellect, stamina, strength);
+    }
+
+    private void ResetStats()
+    {
+        MyHealth.Initialize(stamina*StaminaMultiplier(), stamina*StaminaMultiplier());
+        MyMana.Initialize(intellect * intellectMultiplier, intellect * intellectMultiplier);
+    }
+
+    private void UpdateMaxStats()
+    {
+        MyHealth.SetMaxValue(stamina * StaminaMultiplier());
+        MyMana.SetMaxValue(intellect * intellectMultiplier);
+    }
+
+    private int StaminaMultiplier()
+    {
+        if (MyLevel < 10)
+        {
+            return 1;
+        }
+        else if (MyLevel > 10)
+        {
+            return 2;
+        }
+
+        return 3;
     }
 
     /// <summary>
@@ -278,6 +354,8 @@ public class Player : Character
             SpellScript s = Instantiate(newSpell.MySpellPrefab, exitPoints[exitIndex].position, Quaternion.identity).GetComponent<SpellScript>();
 
             s.Initialize(currentTarget, newSpell.MyDamage, this,newSpell.MyDebuff);
+
+            mana.MyCurrentValue -= newSpell.ManaCost;
         }
 
         StopAction(); //Ends the attack
@@ -320,14 +398,61 @@ public class Player : Character
     /// <summary>
     /// Casts a spell
     /// </summary>
-    public void CastSpell(ICastable castable)
+    public void CastSpell(Spell spell)
     {
         Block();
 
-        if (MyTarget != null && MyTarget.GetComponentInParent<Character>().IsAlive &&!IsAttacking && !IsMoving && InLineOfSight() && InRange((castable as Spell),MyTarget.transform.position)) //Chcks if we are able to attack
+        if (spell.ManaCost <= mana.MyCurrentValue)
         {
-            MyInitRoutine = StartCoroutine(AttackRoutine(castable));
+            if (!spell.NeedsTarget && unusedSpell == null)
+            {
+                unusedSpell = Instantiate(spell.MySpellPrefab, Camera.main.ScreenToWorldPoint(Input.mousePosition), Quaternion.identity);
+                unusedSpell.transform.position = new Vector3(unusedSpell.transform.position.x, unusedSpell.transform.position.y, 0);
+                aoeSpell = spell;
+            }
+            else
+            {
+                Destroy(unusedSpell);
+            }
+
+            if (MyTarget != null && MyTarget.GetComponentInParent<Character>().IsAlive && !IsAttacking && !IsMoving && InLineOfSight() && InRange(spell, MyTarget.transform.position)) //Chcks if we are able to attack
+            {
+                MyInitRoutine = StartCoroutine(AttackRoutine(spell));
+            }
         }
+
+
+    }
+
+    private IEnumerator Regen()
+    {
+        while (true)
+        {
+            if (!InCombat)
+            {
+                if (health.MyCurrentValue < health.MyMaxValue)
+                {
+                    int value = Mathf.FloorToInt(health.MyMaxValue * 0.05f);
+                    health.MyCurrentValue += value;
+
+                    CombatTextManager.MyInstance.CreateText(transform.position, value.ToString(), SCTTYPE.HEAL, false);
+                }
+
+                if (mana.MyCurrentValue < mana.MyMaxValue)
+                {
+                    int value = Mathf.FloorToInt(mana.MyMaxValue * 0.05f);
+                    mana.MyCurrentValue += value;
+
+                    CombatTextManager.MyInstance.CreateText(transform.position, value.ToString(), SCTTYPE.MANA, false);
+                }
+            }
+
+
+            //This is how often we will get a regen tick
+            yield return new WaitForSeconds(1.5f);
+        }
+
+     
     }
 
     private bool InRange(Spell spell, Vector2 targetPos)
@@ -455,14 +580,6 @@ public class Player : Character
         }
     }
 
-    public void AddAttacker(Enemy enemy)
-    {
-        if (!MyAttackers.Contains(enemy))
-        {
-            MyAttackers.Add(enemy);
-        }
-    }
-
     private IEnumerator Ding()
     {
         while (!MyXp.IsFull)
@@ -477,12 +594,42 @@ public class Player : Character
         MyXp.MyMaxValue = Mathf.Floor(MyXp.MyMaxValue);
         MyXp.MyCurrentValue = MyXp.MyOverflow;
         MyXp.Reset();
-
+        stamina += IncreaseBaseStat();
+        intellect += IncreaseBaseStat();
+        ResetStats();
         if (MyXp.MyCurrentValue >= MyXp.MyMaxValue)
         {
             StartCoroutine(Ding());
         }
 
+    }
+
+    public void EquipGear(Armor armor)
+    {
+        stamina += armor.Stamina;
+        intellect += armor.Intellect;
+        strength += armor.Strength;
+        UpdateMaxStats();
+        UIManager.MyInstance.UpdateStatsText(intellect, stamina, strength);
+    }
+
+    public void DequipGear(Armor armor)
+    {
+        stamina -= armor.Stamina;
+        intellect -= armor.Intellect;
+        strength -= armor.Strength;
+        UpdateMaxStats();
+        UIManager.MyInstance.UpdateStatsText(intellect, stamina, strength);
+    }
+
+    private int IncreaseBaseStat()
+    {
+        if (MyLevel < 10)
+        {
+            return 3;
+        }
+
+        return 0;
     }
 
     public void UpdateLevel()
@@ -566,6 +713,31 @@ public class Player : Character
         {
             spriteRenderer.enabled = false;
         }
+    }
+
+    public override void AddAttacker(Character attacker)
+    {
+        int count = Attackers.Count;
+
+        base.AddAttacker(attacker);
+
+        if (count == 0)
+        {
+            InCombat = true;
+            CombatTextManager.MyInstance.CreateText(transform.position, "+COMBAT", SCTTYPE.TEXT, false);
+        }
+    }
+
+    public override void RemoveAttacker(Character attacker)
+    {
+        base.RemoveAttacker(attacker);
+        if (Attackers.Count == 0)
+        {
+            InCombat = false;
+            CombatTextManager.MyInstance.CreateText(transform.position, "-COMBAT", SCTTYPE.TEXT, false);
+
+        }
+        
     }
 
     public void OnTriggerEnter2D(Collider2D collision)

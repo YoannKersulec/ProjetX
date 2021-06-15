@@ -17,6 +17,9 @@ public class CharButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
     [SerializeField]
     private GearSocket gearSocket;
 
+    [SerializeField]
+    private Image visual;
+
     public Armor MyEquippedArmor
     {
         get
@@ -54,8 +57,16 @@ public class CharButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
     {
         armor.Remove();
 
+        if (visual != null)
+        {
+            visual.gameObject.SetActive(true);
+            visual.sprite = armor.Visual;
+        }
+
         if (MyEquippedArmor != null)
         {
+            Player.MyInstance.DequipGear(MyEquippedArmor);
+
             if (MyEquippedArmor != armor)
             {
                 armor.MySlot.AddItem(MyEquippedArmor);
@@ -83,6 +94,8 @@ public class CharButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
         {
             gearSocket.Equip(MyEquippedArmor.MyAnimationClips);
         }
+
+        Player.MyInstance.EquipGear(armor);
     
     }
 
@@ -103,10 +116,21 @@ public class CharButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
     {
         icon.color = Color.white;
         icon.enabled = false;
+
+        if (visual != null)
+        {
+            visual.gameObject.SetActive(false);
+        }
+
        
         if (gearSocket != null && MyEquippedArmor.MyAnimationClips != null)
         {
+            Player.MyInstance.DequipGear(MyEquippedArmor);
             gearSocket.Dequip();
+        }
+        else if (MyEquippedArmor != null)
+        {
+            Player.MyInstance.DequipGear(MyEquippedArmor);
         }
 
         equippedArmor.MyCharButton = null;

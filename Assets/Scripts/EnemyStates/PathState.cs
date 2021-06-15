@@ -38,9 +38,13 @@ public class PathState : IState
         {
             parent.ChangeState(new EvadeState());
         }
-       
+        if (!parent.InRange)
+        {
+            parent.ChangeState(new EvadeState());
+        }
 
-   
+
+
     }
 
     public void Exit()
@@ -52,7 +56,7 @@ public class PathState : IState
     {
         if (parent.MyPath != null)
         {
-            transform.position = Vector2.MoveTowards(transform.position, destination, 2 * Time.deltaTime);
+            transform.position = Vector2.MoveTowards(transform.position, destination, parent.CurrentSpeed * Time.deltaTime);
 
             parent.ActivateLayer("WalkLayer");
            

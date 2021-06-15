@@ -178,7 +178,7 @@ public class Enemy : Character, IInteractable
 
                 if (!IsAlive)
                 {
-                    Player.MyInstance.MyAttackers.Remove(this);
+                    source.RemoveAttacker(this);
                     Player.MyInstance.GainXP(XPManager.CalculateXP((this as Enemy)));
                 }
             }
@@ -229,6 +229,7 @@ public class Enemy : Character, IInteractable
             MyAggroRange = initAggroRange;
             MyAggroRange += distance;
             MyTarget = target;
+            target.AddAttacker(this);
         }
     }
 

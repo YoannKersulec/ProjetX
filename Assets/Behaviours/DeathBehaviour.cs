@@ -17,7 +17,7 @@ public class DeathBehaviour : StateMachineBehaviour {
     {
         timePassed += Time.deltaTime;
 
-        if (timePassed >= 5)
+        if (timePassed >= 10)
         {
             animator.GetComponent<Enemy>().OnCharacterRemoved();
         }

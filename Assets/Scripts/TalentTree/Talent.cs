@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class Talent : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IDescribable
 {
-    private Image sprite;
+    protected Image icon;
 
     [SerializeField]
     private Text countText;
@@ -45,7 +45,7 @@ public class Talent : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, 
 
     private void Awake()
     {
-        sprite = GetComponent<Image>();
+        icon = GetComponent<Image>();
 
         countText.text = $"{MyCurrentCount}/{maxCount}";
 
@@ -79,7 +79,7 @@ public class Talent : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, 
 
     public void Lock()
     {
-        sprite.color = Color.gray;
+        icon.color = Color.gray;
         countText.color = Color.gray;
 
 
@@ -96,7 +96,7 @@ public class Talent : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, 
 
     public void Unlock()
     {
-        sprite.color = Color.white;
+        icon.color = Color.white;
         countText.color = Color.white;
 
         if (arrowImage != null)

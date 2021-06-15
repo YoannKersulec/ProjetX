@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class TalentTree : MonoBehaviour
 {
 
-    private int points = 10;
+    private int points = 20;
 
     [SerializeField]
     private Talent[] talents;

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets.Scripts.Debuffs
 {
@@ -11,12 +12,16 @@ namespace Assets.Scripts.Debuffs
     {
         public float MyTickDamage { get; set; }
 
+        public override string Name
+        {
+            get { return "Ignite"; }
+        }
+
         private float elapsed;
 
-        public  IgniteDebuff()
+        public  IgniteDebuff(Image icon) : base(icon)
         {
             MyDuration = 20;
-            MyTickDamage = 5;
         }
 
         public override void Update()
@@ -25,7 +30,7 @@ namespace Assets.Scripts.Debuffs
 
             if (elapsed >= MyDuration/MyTickDamage)
             {
-                character.TakeDamage(MyTickDamage, null);
+                MyCharacter.TakeDamage(MyTickDamage, null);
                 elapsed = 0;
             }
 
@@ -36,6 +41,12 @@ namespace Assets.Scripts.Debuffs
         {
             elapsed = 0;
             base.Remove();
+        }
+
+        public override Debuff Clone()
+        {
+            IgniteDebuff clone = (IgniteDebuff)this.MemberwiseClone();
+            return clone;
         }
     }
 }

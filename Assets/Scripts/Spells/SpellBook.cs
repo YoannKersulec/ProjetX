@@ -67,6 +67,9 @@ public class SpellBook : MonoBehaviour
     /// </summary>
     private Coroutine fadeRoutine;
 
+    [SerializeField]
+    private GameObject[] obtainableSpells;
+
 
     /// <summary>
     /// Cast a spell at an enemy
@@ -176,6 +179,24 @@ public class SpellBook : MonoBehaviour
         {
             StopCoroutine(spellRoutine);
             spellRoutine = null;
+        }
+    }
+
+    
+    public void LearnSpell(string name)
+    {
+        switch (name.ToLower())
+        {
+            case "rain of fire":
+                obtainableSpells[0].SetActive(true);
+                break;
+            case "blizzard":
+                obtainableSpells[1].SetActive(true);
+                break;
+            case "chainlightning":
+                obtainableSpells[2].SetActive(true);
+                break;
+
         }
     }
 

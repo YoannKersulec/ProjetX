@@ -14,16 +14,16 @@ public class SpellScript : MonoBehaviour {
     /// The spell's movement speed
     /// </summary>
     [SerializeField]
-    private float speed;
+    protected float speed;
 
     /// <summary>
     /// The spells target
     /// </summary>
-    public Transform MyTarget { get; private set; }
+    public Transform MyTarget { get; protected set; }
 
-    private Character source;
+    public Character Source { get; set; }
 
-    private float damage;
+    protected float damage;
 
     private Debuff debuff;
 
@@ -38,7 +38,7 @@ public class SpellScript : MonoBehaviour {
     {
         this.MyTarget = target;
         this.damage = damage;
-        this.source = source;
+        this.Source = source;
         this.debuff = debuff;
     }
 
@@ -46,7 +46,7 @@ public class SpellScript : MonoBehaviour {
     {
         this.MyTarget = target;
         this.damage = damage;
-        this.source = source;
+        this.Source = source;
     }
 
     private void FixedUpdate()
@@ -69,17 +69,18 @@ public class SpellScript : MonoBehaviour {
 
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.tag == "HitBox" && collision.transform == MyTarget)
         {
             Character c = collision.GetComponentInParent<Character>();
             speed = 0;
-            c.TakeDamage(damage, source);
+            c.TakeDamage(damage, Source);
 
             if (debuff != null)
             {
-                debuff.Apply(c);
+                Debuff clone = debuff.Clone();
+                clone.Apply(c);
             }
 
             GetComponent<Animator>().SetTrigger("impact");

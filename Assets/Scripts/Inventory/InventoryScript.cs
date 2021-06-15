@@ -134,6 +134,7 @@ public class InventoryScript : MonoBehaviour
         {
             GoldNugget nugget = (GoldNugget)Instantiate(items[11]);
             AddItem(nugget);
+            AddItem((HealthPotion)Instantiate(items[9]));
         }
         if (Input.GetKeyDown(KeyCode.H))
         {
@@ -147,6 +148,7 @@ public class InventoryScript : MonoBehaviour
             AddItem((Armor)Instantiate(items[6]));
             AddItem((Armor)Instantiate(items[7]));
             AddItem((Armor)Instantiate(items[10]));
+           
 
         }
 

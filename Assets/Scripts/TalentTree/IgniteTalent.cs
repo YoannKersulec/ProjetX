@@ -6,13 +6,19 @@ using UnityEngine;
 public class IgniteTalent : Talent
 {
 
-    IgniteDebuff debuff = new IgniteDebuff();
+    IgniteDebuff debuff;
 
     private float tickDamage = 5;
 
     private float damageIncrease = 2;
 
     private string nextRank = string.Empty;
+
+    public void Start()
+    {
+        debuff = new IgniteDebuff(icon);
+        this.debuff.MyTickDamage = tickDamage;
+    }
 
     public override bool Click()
     {

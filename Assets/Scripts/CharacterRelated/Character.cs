@@ -16,6 +16,8 @@ public abstract class Character : MonoBehaviour
     [SerializeField]
     private float speed;
 
+    private float currentSpeed;
+
     [SerializeField]
     private string type;
 
@@ -62,11 +64,13 @@ public abstract class Character : MonoBehaviour
 
     public Stack<Vector3> MyPath { get; set; }
 
-    private List<Debuff> debuffs = new List<Debuff>();
+    public List<Debuff> MyDebuffs { get; set; } = new List<Debuff>();
 
     private List<Debuff> newDebuffs = new List<Debuff>();
 
     private List<Debuff> expiredDebuffs = new List<Debuff>();
+
+    public List<Character> Attackers { get; set; } = new List<Character>();
 
     public Stat MyHealth
     {
@@ -103,16 +107,16 @@ public abstract class Character : MonoBehaviour
         }
     }
 
-    public float Speed
+    public float CurrentSpeed
     {
         get
         {
-            return speed;
+            return currentSpeed;
         }
 
         set
         {
-            speed = value;
+            currentSpeed = value;
         }
     }
 
@@ -166,9 +170,12 @@ public abstract class Character : MonoBehaviour
         }
     }
 
+    public float Speed { get => speed; private set => speed = value; }
+
     protected virtual void Start()
     {
         //Makes a reference to the character's animator
+        currentSpeed = Speed;
         MyAnimator = GetComponent<Animator>();
         MySpriteRenderer = GetComponent<SpriteRenderer>();
     }
@@ -199,7 +206,7 @@ public abstract class Character : MonoBehaviour
             if (IsAlive)
             {
                 //Makes sure that the player moves
-                MyRigidbody.velocity = Direction.normalized * Speed;
+                MyRigidbody.velocity = Direction.normalized * CurrentSpeed;
             }
         }
     }
@@ -240,9 +247,9 @@ public abstract class Character : MonoBehaviour
     private void HandleDebuffs()
     {
 
-        if (debuffs.Count > 0)
+        if (MyDebuffs.Count > 0)
         {
-            foreach (Debuff debuff in debuffs)
+            foreach (Debuff debuff in MyDebuffs)
             {
                 debuff.Update();
             }
@@ -250,7 +257,7 @@ public abstract class Character : MonoBehaviour
 
         if (newDebuffs.Count > 0)
         {
-            debuffs.AddRange(newDebuffs);
+            MyDebuffs.AddRange(newDebuffs);
             newDebuffs.Clear();
         }
 
@@ -258,7 +265,7 @@ public abstract class Character : MonoBehaviour
         {
             foreach (Debuff debuff in expiredDebuffs)
             {
-                debuffs.Remove(debuff);
+                MyDebuffs.Remove(debuff);
             }
 
             expiredDebuffs.Clear();
@@ -267,11 +274,22 @@ public abstract class Character : MonoBehaviour
 
     public void ApplyDebuff(Debuff debuff)
     {
+        //check if we have a debuff with the same name
+        Debuff tmp = MyDebuffs.Find(x => x.Name == debuff.Name);
+
+        if (tmp != null) //If that's the case
+        {
+            //Then we remove the old debuff
+            RemoveDebuff(tmp);
+        }
+
+        //Apply the new debuff
         this.newDebuffs.Add(debuff);
     }
 
     public void RemoveDebuff(Debuff debuff)
     {
+        UIManager.MyInstance.RemoveDebuff(debuff);
         this.expiredDebuffs.Add(debuff);
     }
 
@@ -312,6 +330,19 @@ public abstract class Character : MonoBehaviour
     {
         MyHealth.MyCurrentValue += health;
         CombatTextManager.MyInstance.CreateText(transform.position, health.ToString(),SCTTYPE.HEAL,true);
+    }
+
+    public virtual void AddAttacker(Character attacker)
+    {
+        if (!Attackers.Contains(attacker))
+        {
+            Attackers.Add(attacker);
+        }
+    }
+
+    public virtual void RemoveAttacker(Character attacker)
+    {
+        Attackers.Remove(attacker);
     }
 
 }
