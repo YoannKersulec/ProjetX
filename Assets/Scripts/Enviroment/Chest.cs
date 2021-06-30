@@ -15,10 +15,15 @@ public class Chest : MonoBehaviour, IInteractable
     [SerializeField]
     private CanvasGroup canvasGroup;
 
+    [SerializeField]
     private List<Item> items;
 
     [SerializeField]
     private BagScript bag;
+
+    [SerializeField]
+    private List<Item> debugItems;
+
 
     public List<Item> MyItems
     {
@@ -49,6 +54,8 @@ public class Chest : MonoBehaviour, IInteractable
     private void Awake()
     {
         items = new List<Item>();
+        GoldNugget nugget = (GoldNugget)Instantiate(debugItems[0]);
+        items.Add(nugget);
     }
 
     public void Interact()
