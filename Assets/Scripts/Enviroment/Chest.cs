@@ -76,6 +76,8 @@ public class Chest : MonoBehaviour, IInteractable
                 {
                     GoldNugget nugget = (GoldNugget)Instantiate(debugItems[0]);
                     MyBag.AddItem(nugget);
+                    HealthPotion potion = (HealthPotion)Instantiate(debugItems[1]);
+                    MyBag.AddItem(potion);
                 }
             }
             isOpen = true;
