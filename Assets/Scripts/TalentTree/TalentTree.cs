@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class TalentTree : MonoBehaviour
 {
 
-    private int points = 20;
+    private int points = 0;
 
     [SerializeField]
     private Talent[] talents;
@@ -37,6 +37,15 @@ public class TalentTree : MonoBehaviour
     void Start()
     {
         ResetTalents();
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            points++;
+            UpdateTalentPointText();
+        }
     }
 
     public void TryUseTalent(Talent talent)

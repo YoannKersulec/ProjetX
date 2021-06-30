@@ -13,6 +13,7 @@ public class ChangeMap : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         player.transform.position = teleportTarget.transform.position;
+        Player.MyInstance.MyCurrentTile.position = teleportTarget.transform.position;
         off.SetActive(false);
         UI.SetActive(false);
         StartCoroutine(waiter());
@@ -22,7 +23,7 @@ public class ChangeMap : MonoBehaviour
         yield return new WaitForSeconds(4);
         UI.SetActive(true);
         Menu.SetActive(false);
-        on.SetActive(true);
+        off.SetActive(true);
 
     }
 }

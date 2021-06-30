@@ -24,6 +24,8 @@ public class Chest : MonoBehaviour, IInteractable
     [SerializeField]
     private List<Item> debugItems;
 
+    bool FirstOpened = false;
+
 
     public List<Item> MyItems
     {
@@ -54,8 +56,7 @@ public class Chest : MonoBehaviour, IInteractable
     private void Awake()
     {
         items = new List<Item>();
-        GoldNugget nugget = (GoldNugget)Instantiate(debugItems[0]);
-        items.Add(nugget);
+
     }
 
     public void Interact()
@@ -66,7 +67,17 @@ public class Chest : MonoBehaviour, IInteractable
         }
         else
         {
+            
             AddItems();
+            if (!FirstOpened)
+            {
+                FirstOpened = true;
+                for (int i = 0; i < 4; i++)
+                {
+                    GoldNugget nugget = (GoldNugget)Instantiate(debugItems[0]);
+                    MyBag.AddItem(nugget);
+                }
+            }
             isOpen = true;
             spriteRenderer.sprite = openSprite;
             canvasGroup.alpha = 1;
