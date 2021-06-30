@@ -43,7 +43,7 @@ public class TalentTree : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
-            points++;
+            points+= 4;
             UpdateTalentPointText();
         }
     }

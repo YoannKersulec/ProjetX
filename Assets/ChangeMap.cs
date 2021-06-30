@@ -16,6 +16,7 @@ public class ChangeMap : MonoBehaviour
         Player.MyInstance.MyCurrentTile.position = teleportTarget.transform.position;
         off.SetActive(false);
         UI.SetActive(false);
+        Menu.SetActive(true);
         StartCoroutine(waiter());
     }
     IEnumerator waiter()
@@ -23,7 +24,7 @@ public class ChangeMap : MonoBehaviour
         yield return new WaitForSeconds(4);
         UI.SetActive(true);
         Menu.SetActive(false);
-        off.SetActive(true);
+        on.SetActive(true);
 
     }
 }
